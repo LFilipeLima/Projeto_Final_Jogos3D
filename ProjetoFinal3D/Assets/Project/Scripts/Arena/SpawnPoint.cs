@@ -10,7 +10,7 @@ public sealed class SpawnPoint : MonoBehaviour
     public Vector3 Position => transform.position;
     public Quaternion Rotation => transform.rotation;
 
-    /// <summary>Projects this point onto the baked NavMesh when a nearby position exists.</summary>
+
     public bool TryGetNavMeshPosition(float searchRadius, out Vector3 position, int areaMask = NavMesh.AllAreas)
     {
         if (searchRadius <= 0f)
