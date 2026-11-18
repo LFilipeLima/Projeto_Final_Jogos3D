@@ -7,11 +7,11 @@ public sealed class EnemyController : MonoBehaviour
     [SerializeField] private float repathInterval = 0.2f;
     [SerializeField] private float attackRange = 1.5f;
     [SerializeField] private float attackInterval = 1.1f;
-
     private NavMeshAgent agent;
     private EnemyHealth health;
     private Transform player;
     private PlayerHealth playerHealth;
+
     private float nextPathTime;
     private float nextAttackTime;
 
@@ -21,10 +21,13 @@ public sealed class EnemyController : MonoBehaviour
         health = GetComponent<EnemyHealth>();
     }
 
-    public void Initialize(UnityEngine.Transform player)
+    public void Initialize(Transform player)
     {
         this.player = player;
-        playerHealth = player != null ? player.GetComponentInParent<PlayerHealth>() : null;
+        playerHealth = player != null
+            ? player.GetComponentInParent<PlayerHealth>()
+            : null;
+
         nextPathTime = Time.time;
         nextAttackTime = Time.time;
     }
@@ -54,6 +57,7 @@ public sealed class EnemyController : MonoBehaviour
 
         Vector3 separation = player.position - transform.position;
         separation.y = 0f;
+
         if (separation.sqrMagnitude > attackRange * attackRange)
         {
             return;
@@ -66,6 +70,7 @@ public sealed class EnemyController : MonoBehaviour
 
         playerHealth.TakeDamage(1);
         nextAttackTime = Time.time + attackInterval;
+
         if (playerHealth.IsDead)
         {
             StopPursuit();
