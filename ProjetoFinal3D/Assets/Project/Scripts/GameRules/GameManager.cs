@@ -1,4 +1,7 @@
 using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Reflection;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -12,6 +15,13 @@ public class GameManager : MonoBehaviour
     [Tooltip("Componentes desativados automaticamente ao encerrar a partida (ex.: PlayerMovement, PlayerShooter, PlayerCamera).")]
     [SerializeField] private MonoBehaviour[] playerControlScripts;
 
+    [Header("Ondas e Spawns")]
+    [SerializeField] private GameObject enemyPrefab;
+    [SerializeField] private GameObject energyCellPrefab;
+    [SerializeField] private Transform[] spawnPoints;
+    [SerializeField] private float delayBetweenWaves = 3f;
+    [SerializeField] private float minCellSpawnHeight = 0.6f;
+
     [Header("Configurações de Estado")]
     [SerializeField] private bool lockCursorDuringPlay = false;
 
@@ -20,6 +30,8 @@ public class GameManager : MonoBehaviour
     public const int TotalCellsCount = 9;
     public const int PointsPerCell = 100;
     public const int MaxPossibleScore = TotalCellsCount * PointsPerCell;
+
+    private static readonly int[] WaveEnemyCounts = { 2, 3, 4 };
 
     public GameState CurrentState { get; private set; } = GameState.Playing;
     public bool IsPlaying => CurrentState == GameState.Playing;
@@ -39,6 +51,10 @@ public class GameManager : MonoBehaviour
 
     public event Action<GameState> GameStateChanged;
     public event Action StatsChanged;
+
+    private readonly HashSet<int> processedEnemyIds = new HashSet<int>();
+    private readonly List<Action> cleanupSubscriptions = new List<Action>();
+    private Coroutine waveRoutine;
 
     private void Awake()
     {
@@ -81,6 +97,9 @@ public class GameManager : MonoBehaviour
 
     private void OnDestroy()
     {
+        StopWaveRoutine();
+        CleanupEnemySubscriptions();
+
         if (Instance == this)
         {
             Instance = null;
@@ -98,6 +117,7 @@ public class GameManager : MonoBehaviour
         }
 
         SetState(GameState.Playing, forceNotify: true);
+        StartWave(1);
     }
 
     public void RegisterCellCollected()
@@ -128,6 +148,7 @@ public class GameManager : MonoBehaviour
             return;
         }
 
+        StopWaveRoutine();
         ShowCollectRemainingPrompt = false;
         NotifyStatsChanged();
         SetState(GameState.Victory);
@@ -140,6 +161,7 @@ public class GameManager : MonoBehaviour
             return;
         }
 
+        StopWaveRoutine();
         ShowCollectRemainingPrompt = false;
         NotifyStatsChanged();
         SetState(GameState.Defeat);
@@ -150,6 +172,259 @@ public class GameManager : MonoBehaviour
         Time.timeScale = 1f;
         Scene currentScene = SceneManager.GetActiveScene();
         SceneManager.LoadScene(currentScene.buildIndex);
+    }
+
+    private void StartWave(int waveNumber)
+    {
+        if (IsGameOver)
+        {
+            return;
+        }
+
+        if (waveNumber < 1 || waveNumber > TotalWavesCount)
+        {
+            Debug.LogWarning($"[GameManager] Número de onda inválido ignorado: {waveNumber}");
+            return;
+        }
+
+        if (enemyPrefab == null)
+        {
+            Debug.LogError("[GameManager] Enemy Prefab não atribuído no Inspector.");
+            return;
+        }
+
+        CurrentWave = waveNumber;
+        int countToSpawn = WaveEnemyCounts[waveNumber - 1];
+        RemainingEnemies = countToSpawn;
+
+        Debug.Log($"[GameManager] Iniciando Onda {CurrentWave}/{TotalWavesCount} com {countToSpawn} inimigo(s).");
+
+        for (int i = 0; i < countToSpawn; i++)
+        {
+            Vector3 spawnPos = GetSpawnPosition(i, countToSpawn);
+            Quaternion spawnRot = GetSpawnRotation(spawnPos);
+            GameObject enemyInstance = Instantiate(enemyPrefab, spawnPos, spawnRot);
+            enemyInstance.name = $"{enemyPrefab.name}_Onda{CurrentWave}_{i + 1}";
+
+            BindEnemyContracts(enemyInstance);
+        }
+
+        NotifyStatsChanged();
+    }
+
+    private Vector3 GetSpawnPosition(int index, int totalInWave)
+    {
+        if (spawnPoints != null && spawnPoints.Length > 0)
+        {
+            Transform point = spawnPoints[index % spawnPoints.Length];
+            if (point != null)
+            {
+                // Pequeno deslocamento lateral caso a onda tenha mais inimigos que pontos de spawn.
+                int lap = index / spawnPoints.Length;
+                if (lap == 0)
+                {
+                    return point.position;
+                }
+
+                float angle = lap * 45f * Mathf.Deg2Rad;
+                Vector3 offset = new Vector3(Mathf.Cos(angle), 0f, Mathf.Sin(angle)) * (1.2f * lap);
+                return point.position + offset;
+            }
+        }
+
+        Debug.LogWarning("[GameManager] Nenhum SpawnPoint configurado; usando posições circulares padrão.");
+        float fallbackAngle = (index / (float)Mathf.Max(1, totalInWave)) * Mathf.PI * 2f;
+        return new Vector3(Mathf.Cos(fallbackAngle) * 6f, 1f, Mathf.Sin(fallbackAngle) * 6f);
+    }
+
+    private Quaternion GetSpawnRotation(Vector3 spawnPos)
+    {
+        if (playerHealth == null)
+        {
+            return Quaternion.identity;
+        }
+
+        Vector3 toPlayer = playerHealth.transform.position - spawnPos;
+        toPlayer.y = 0f;
+
+        if (toPlayer.sqrMagnitude > 0.001f)
+        {
+            return Quaternion.LookRotation(toPlayer.normalized);
+        }
+
+        return Quaternion.identity;
+    }
+
+    private void BindEnemyContracts(GameObject enemyInstance)
+    {
+        Transform playerTransform = playerHealth != null ? playerHealth.transform : null;
+
+        // 1. Contrato EnemyController.Initialize(Transform player)
+        Component enemyController = enemyInstance.GetComponent("EnemyController");
+        if (enemyController != null)
+        {
+            MethodInfo initMethod = enemyController.GetType().GetMethod(
+                "Initialize",
+                BindingFlags.Instance | BindingFlags.Public,
+                null,
+                new[] { typeof(Transform) },
+                null
+            );
+
+            if (initMethod != null)
+            {
+                initMethod.Invoke(enemyController, new object[] { playerTransform });
+            }
+            else
+            {
+                Debug.LogWarning("[GameManager] EnemyController encontrado, mas sem método público Initialize(Transform).");
+            }
+        }
+
+        // 2. Contrato EnemyHealth.Died (event Action<Vector3>)
+        Component enemyHealth = enemyInstance.GetComponent("EnemyHealth");
+        if (enemyHealth != null)
+        {
+            EventInfo diedEvent = enemyHealth.GetType().GetEvent("Died", BindingFlags.Instance | BindingFlags.Public);
+            if (diedEvent != null && diedEvent.EventHandlerType == typeof(Action<Vector3>))
+            {
+                Action<Vector3> handler = deathPos => HandleEnemyDied(enemyInstance, deathPos);
+                diedEvent.AddEventHandler(enemyHealth, handler);
+                cleanupSubscriptions.Add(() =>
+                {
+                    if (enemyHealth != null)
+                    {
+                        diedEvent.RemoveEventHandler(enemyHealth, handler);
+                    }
+                });
+                return;
+            }
+
+            Debug.LogWarning("[GameManager] EnemyHealth encontrado, mas sem evento público Action<Vector3> Died.");
+        }
+
+        // 3. Fallback isolado exclusivo para testes na cena RulesTest
+        RulesTestEnemyTarget testTarget = enemyInstance.GetComponent<RulesTestEnemyTarget>();
+        if (testTarget != null)
+        {
+            Action<Vector3> handler = deathPos => HandleEnemyDied(enemyInstance, deathPos);
+            testTarget.Died += handler;
+            cleanupSubscriptions.Add(() =>
+            {
+                if (testTarget != null)
+                {
+                    testTarget.Died -= handler;
+                }
+            });
+            return;
+        }
+
+        Debug.LogError($"[GameManager] O prefab '{enemyInstance.name}' não possui EnemyHealth nem RulesTestEnemyTarget.", enemyInstance);
+    }
+
+    private void HandleEnemyDied(GameObject enemyInstance, Vector3 deathPosition)
+    {
+        if (IsGameOver)
+        {
+            return;
+        }
+
+        if (enemyInstance != null)
+        {
+            int instanceId = enemyInstance.GetInstanceID();
+            if (!processedEnemyIds.Add(instanceId))
+            {
+                return;
+            }
+        }
+
+        RemainingEnemies = Mathf.Max(0, RemainingEnemies - 1);
+        DefeatedEnemies++;
+
+        SpawnEnergyCell(deathPosition);
+        NotifyStatsChanged();
+
+        Debug.Log($"[GameManager] Inimigo derrotado ({DefeatedEnemies}/{TotalEnemiesCount}). Restantes na onda {CurrentWave}: {RemainingEnemies}");
+
+        if (RemainingEnemies == 0)
+        {
+            OnCurrentWaveCleared();
+        }
+    }
+
+    private void SpawnEnergyCell(Vector3 deathPosition)
+    {
+        if (energyCellPrefab == null)
+        {
+            Debug.LogError("[GameManager] Energy Cell Prefab não atribuído no Inspector.");
+            return;
+        }
+
+        Vector3 spawnPos = deathPosition;
+        if (spawnPos.y < minCellSpawnHeight)
+        {
+            spawnPos.y = minCellSpawnHeight;
+        }
+
+        Instantiate(energyCellPrefab, spawnPos, Quaternion.identity);
+    }
+
+    private void OnCurrentWaveCleared()
+    {
+        if (IsGameOver)
+        {
+            return;
+        }
+
+        if (CurrentWave < TotalWavesCount)
+        {
+            int nextWave = CurrentWave + 1;
+            Debug.Log($"[GameManager] Onda {CurrentWave} concluída! Próxima onda ({nextWave}) em {delayBetweenWaves}s.");
+            StopWaveRoutine();
+            waveRoutine = StartCoroutine(StartNextWaveAfterDelay(nextWave));
+            return;
+        }
+
+        // Última onda (Onda 3) concluída: não iniciar onda extra.
+        if (CollectedCells < TotalCellsCount)
+        {
+            ShowCollectRemainingPrompt = true;
+            NotifyStatsChanged();
+        }
+
+        CheckVictoryCondition();
+    }
+
+    private IEnumerator StartNextWaveAfterDelay(int nextWave)
+    {
+        yield return new WaitForSeconds(delayBetweenWaves);
+        waveRoutine = null;
+
+        if (IsGameOver)
+        {
+            yield break;
+        }
+
+        StartWave(nextWave);
+    }
+
+    private void StopWaveRoutine()
+    {
+        if (waveRoutine != null)
+        {
+            StopCoroutine(waveRoutine);
+            waveRoutine = null;
+        }
+    }
+
+    private void CleanupEnemySubscriptions()
+    {
+        for (int i = 0; i < cleanupSubscriptions.Count; i++)
+        {
+            cleanupSubscriptions[i]?.Invoke();
+        }
+        cleanupSubscriptions.Clear();
+        processedEnemyIds.Clear();
     }
 
     protected void CheckVictoryCondition()
@@ -217,6 +492,18 @@ public class GameManager : MonoBehaviour
     }
 
 #if UNITY_EDITOR
+    [ContextMenu("Teste/Derrotar Todos os Inimigos da Onda Atual")]
+    private void DebugClearCurrentWave()
+    {
+        if (IsGameOver) return;
+
+        RulesTestEnemyTarget[] targets = FindObjectsByType<RulesTestEnemyTarget>(FindObjectsSortMode.None);
+        for (int i = 0; i < targets.Length; i++)
+        {
+            targets[i].KillImmediately();
+        }
+    }
+
     [ContextMenu("Teste/Simular Derrota")]
     private void DebugSimulateDefeat()
     {
