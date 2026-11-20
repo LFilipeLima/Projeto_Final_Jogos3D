@@ -417,6 +417,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: TrainingArena
       objectReference: {fileID: 0}
+    - target: {fileID: 4530590177909414847, guid: 7f84f52095a974fd685423c6cc7bb8e6, type: 3}
+      propertyPath: hitMask.m_Bits
+      value: 311
+      objectReference: {fileID: 0}
     - target: {fileID: 7332771343362024087, guid: 7f84f52095a974fd685423c6cc7bb8e6, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0
@@ -457,6 +461,22 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 7498206533656383533, guid: 7f84f52095a974fd685423c6cc7bb8e6, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7498206533656383533, guid: 7f84f52095a974fd685423c6cc7bb8e6, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0.14
+      objectReference: {fileID: 0}
+    - target: {fileID: 7498206533656383533, guid: 7f84f52095a974fd685423c6cc7bb8e6, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: -5
+      objectReference: {fileID: 0}
+    - target: {fileID: 7636490927177954329, guid: 7f84f52095a974fd685423c6cc7bb8e6, type: 3}
+      propertyPath: cameraTransform
+      value: 
+      objectReference: {fileID: 620684613}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
