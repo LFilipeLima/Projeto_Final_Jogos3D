@@ -7,6 +7,7 @@ public sealed class EnemyHealth : MonoBehaviour, IDamageable
     public int CurrentHealth { get; private set; }
     public bool IsDead { get; private set; }
 
+    public event System.Action Hurt;
     public event System.Action<UnityEngine.Vector3> Died;
 
     private void Awake()
@@ -25,6 +26,7 @@ public sealed class EnemyHealth : MonoBehaviour, IDamageable
         CurrentHealth = Mathf.Max(0, CurrentHealth - amount);
         if (CurrentHealth > 0)
         {
+            Hurt?.Invoke();
             return;
         }
 

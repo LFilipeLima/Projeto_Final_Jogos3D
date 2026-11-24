@@ -35,6 +35,13 @@ public class PlayerHealth : MonoBehaviour, IDamageable
         }
     }
 
+    public void RecoverOne()
+    {
+        if (IsDead || CurrentHealth >= MaxHealth) return;
+        CurrentHealth++;
+        HealthChanged?.Invoke(CurrentHealth, MaxHealth);
+    }
+
     public void TakeDamage(int amount)
     {
         if (amount <= 0 || IsDead || Time.time < nextDamageTime)

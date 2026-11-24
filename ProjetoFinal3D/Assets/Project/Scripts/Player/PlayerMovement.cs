@@ -4,13 +4,16 @@ using UnityEngine.InputSystem;
 [RequireComponent(typeof(CharacterController))]
 public class PlayerMovement : MonoBehaviour
 {
-    [SerializeField] private float moveSpeed = 5f;
-    [SerializeField] private float rotationSpeed = 720f;
+    [SerializeField] private float moveSpeed = 3.5f;
     [SerializeField] private float gravity = -20f;
     [SerializeField] private Transform cameraTransform;
 
     private CharacterController controller;
     private float verticalSpeed;
+    private float dashEnd;
+    private float nextDash;
+    private Vector3 dashDirection;
+    public float DashCooldown => Mathf.Max(0f, nextDash - Time.time);
 
     private void Awake()
     {
@@ -40,18 +43,6 @@ public class PlayerMovement : MonoBehaviour
         Vector3 direction = forward * input.y + right * input.x;
         direction = Vector3.ClampMagnitude(direction, 1f);
 
-        // Gira o personagem para a direção em que está andando.
-        if (direction.sqrMagnitude > 0.001f)
-        {
-            Quaternion targetRotation = Quaternion.LookRotation(direction);
-
-            transform.rotation = Quaternion.RotateTowards(
-                transform.rotation,
-                targetRotation,
-                rotationSpeed * Time.deltaTime
-            );
-        }
-
         // Mantém contato com o chão e aplica gravidade.
         if (controller.isGrounded && verticalSpeed < 0f)
         {
@@ -61,6 +52,13 @@ public class PlayerMovement : MonoBehaviour
         verticalSpeed += gravity * Time.deltaTime;
 
         Vector3 velocity = direction * moveSpeed;
+        if (Keyboard.current != null && Keyboard.current.spaceKey.wasPressedThisFrame && Time.time >= nextDash)
+        {
+            dashDirection = direction.sqrMagnitude > 0.01f ? direction.normalized : transform.forward;
+            dashEnd = Time.time + 0.22f;
+            nextDash = Time.time + 1.6f;
+        }
+        if (Time.time < dashEnd) velocity = dashDirection * 12f;
         velocity.y = verticalSpeed;
 
         controller.Move(velocity * Time.deltaTime);

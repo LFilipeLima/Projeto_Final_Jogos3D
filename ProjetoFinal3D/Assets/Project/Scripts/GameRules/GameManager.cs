@@ -26,12 +26,12 @@ public class GameManager : MonoBehaviour
     [SerializeField] private bool lockCursorDuringPlay = false;
 
     public const int TotalWavesCount = 3;
-    public const int TotalEnemiesCount = 9;
-    public const int TotalCellsCount = 9;
+    public const int TotalEnemiesCount = 15;
+    public const int TotalCellsCount = TotalEnemiesCount;
     public const int PointsPerCell = 100;
     public const int MaxPossibleScore = TotalCellsCount * PointsPerCell;
 
-    private static readonly int[] WaveEnemyCounts = { 2, 3, 4 };
+    private static readonly int[] WaveEnemyCounts = { 3, 5, 7 };
 
     public GameState CurrentState { get; private set; } = GameState.Playing;
     public bool IsPlaying => CurrentState == GameState.Playing;
@@ -55,6 +55,21 @@ public class GameManager : MonoBehaviour
     private readonly HashSet<int> processedEnemyIds = new HashSet<int>();
     private readonly List<Action> cleanupSubscriptions = new List<Action>();
     private Coroutine waveRoutine;
+    private GameObject sector;
+    private RelayCourse relayCourse;
+    public ArchiveTransmission Transmission { get; private set; }
+    public string RelayHint
+    {
+        get
+        {
+            if (relayCourse == null || !IsPlaying) return null;
+            if (Transmission) return "Terminal verde no radar • Aproxime-se e segure R para transmitir.";
+            if (relayCourse.Hint != null) return relayCourse.Hint;
+            if (CurrentWave == 1 && RemainingEnemies > 0)
+                return "Arquivo 88 • Desative os drones para abrir a rota de recuperação.";
+            return null;
+        }
+    }
 
     private void Awake()
     {
@@ -66,6 +81,10 @@ public class GameManager : MonoBehaviour
         }
 
         Instance = this;
+        gameObject.AddComponent<ArchiveAudio>();
+        relayCourse = GetComponent<RelayCourse>();
+        if (!relayCourse && gameObject.scene.path == "Assets/Project/Scenes/MainArena.unity")
+            relayCourse = gameObject.AddComponent<RelayCourse>();
         Time.timeScale = 1f;
 
         if (playerHealth == null)
@@ -120,7 +139,13 @@ public class GameManager : MonoBehaviour
         StartWave(1);
     }
 
-    public void RegisterCellCollected()
+    private readonly int[] recoveredByWave = new int[TotalWavesCount];
+    public int RecoveredIn(int wave) => recoveredByWave[wave - 1];
+    public int DocumentsIn(int wave) => WaveEnemyCounts[wave - 1];
+
+    public void RegisterCellCollected() => RegisterDocument(CurrentWave);
+
+    public void RegisterDocument(int wave)
     {
         if (IsGameOver)
         {
@@ -129,10 +154,16 @@ public class GameManager : MonoBehaviour
 
         if (CollectedCells >= TotalCellsCount)
         {
-            Debug.LogWarning("[GameManager] Tentativa de registar célula além do limite máximo de 9.");
+            Debug.LogWarning("[GameManager] Tentativa de registar célula além do limite máximo.");
             return;
         }
 
+        if (wave < 1 || wave > TotalWavesCount) return;
+        recoveredByWave[wave - 1]++;
+        ArchiveAudio.Play(recoveredByWave[wave - 1] == DocumentsIn(wave)
+            ? ArchiveAudio.Cue.Series : ArchiveAudio.Cue.Document);
+        if (recoveredByWave[wave - 1] == DocumentsIn(wave) && playerHealth)
+            playerHealth.RecoverOne();
         CollectedCells++;
         Score = CollectedCells * PointsPerCell;
 
@@ -194,6 +225,11 @@ public class GameManager : MonoBehaviour
         }
 
         CurrentWave = waveNumber;
+        if (relayCourse && playerHealth)
+        {
+            if (sector) Destroy(sector);
+            sector = ArenaSector.Build(waveNumber, playerHealth);
+        }
         int countToSpawn = WaveEnemyCounts[waveNumber - 1];
         RemainingEnemies = countToSpawn;
 
@@ -207,6 +243,8 @@ public class GameManager : MonoBehaviour
             enemyInstance.name = $"{enemyPrefab.name}_Onda{CurrentWave}_{i + 1}";
 
             BindEnemyContracts(enemyInstance);
+            if (relayCourse && playerHealth && enemyInstance.GetComponent<EnemyController>() && i % 3 != 0)
+                enemyInstance.AddComponent<SpecialEnemy>().Configure(playerHealth, i % 3 == 1);
         }
 
         NotifyStatsChanged();
@@ -366,7 +404,9 @@ public class GameManager : MonoBehaviour
             spawnPos.y = minCellSpawnHeight;
         }
 
-        Instantiate(energyCellPrefab, spawnPos, Quaternion.identity);
+        GameObject pickup = Instantiate(energyCellPrefab, spawnPos, Quaternion.identity);
+        if (pickup.TryGetComponent(out EnergyCell document))
+            document.Catalog(CurrentWave);
     }
 
     private void OnCurrentWaveCleared()
@@ -379,7 +419,7 @@ public class GameManager : MonoBehaviour
         if (CurrentWave < TotalWavesCount)
         {
             int nextWave = CurrentWave + 1;
-            Debug.Log($"[GameManager] Onda {CurrentWave} concluída! Próxima onda ({nextWave}) em {delayBetweenWaves}s.");
+            Debug.Log($"[GameManager] Onda {CurrentWave} concluída! Preparando onda {nextWave}.");
             StopWaveRoutine();
             waveRoutine = StartCoroutine(StartNextWaveAfterDelay(nextWave));
             return;
@@ -397,6 +437,12 @@ public class GameManager : MonoBehaviour
 
     private IEnumerator StartNextWaveAfterDelay(int nextWave)
     {
+        if (relayCourse != null)
+        {
+            yield return relayCourse.Run(CurrentWave, playerHealth, spawnPoints, NotifyStatsChanged);
+            if (relayCourse.Hint != null) yield break;
+        }
+
         yield return new WaitForSeconds(delayBetweenWaves);
         waveRoutine = null;
 
@@ -436,7 +482,19 @@ public class GameManager : MonoBehaviour
 
         if (DefeatedEnemies >= TotalEnemiesCount && CollectedCells >= TotalCellsCount)
         {
-            TriggerVictory();
+            if (!relayCourse || !relayCourse.RemessaRetida)
+            {
+                TriggerVictory();
+                return;
+            }
+            if (Transmission) return;
+            var terminal = new GameObject("Terminal da remessa 17");
+            terminal.transform.SetParent(transform);
+            Transmission = terminal.AddComponent<ArchiveTransmission>();
+            Vector3 parcel = relayCourse.RetainedParcel.position;
+            Transmission.Activate(this, parcel + Vector3.right * 1.3f, TriggerVictory);
+            ShowCollectRemainingPrompt = false;
+            NotifyStatsChanged();
         }
     }
 
@@ -467,6 +525,11 @@ public class GameManager : MonoBehaviour
     private void ApplyStateBehavior(GameState state)
     {
         bool playing = state == GameState.Playing;
+        if (!playing && relayCourse != null)
+        {
+            relayCourse.Clear();
+            NotifyStatsChanged();
+        }
 
         if (playerControlScripts != null)
         {

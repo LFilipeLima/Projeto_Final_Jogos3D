@@ -29,7 +29,7 @@ public static class EnemyPrefabBuilder
         NavMeshAgent agent = enemy.AddComponent<NavMeshAgent>();
         agent.radius = 0.45f;
         agent.height = 2f;
-        agent.speed = 3.5f;
+        agent.speed = 1.8f;
         agent.acceleration = 8f;
         agent.angularSpeed = 720f;
         agent.stoppingDistance = 1.2f;
@@ -48,6 +48,7 @@ public static class EnemyPrefabBuilder
         visual.transform.SetParent(enemy.transform, false);
         visual.transform.localPosition = new Vector3(0f, 1f, 0f);
         visual.layer = enemyLayer;
+        visual.AddComponent<EnemyHitFeedback>();
         UnityEngine.Object.DestroyImmediate(visual.GetComponent<CapsuleCollider>());
         visual.AddComponent<Animator>();
 

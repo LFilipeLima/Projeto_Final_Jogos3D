@@ -1,6 +1,7 @@
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.InputSystem;
 
 public class ArenaHUD : MonoBehaviour
 {
@@ -25,10 +26,91 @@ public class ArenaHUD : MonoBehaviour
     [SerializeField] private Button defeatRestartButton;
 
     private bool isSubscribed;
+    private PlayerMovement movement;
+    private PlayerShooter shooter;
+
+    private EnergyCell[] scanResults = System.Array.Empty<EnergyCell>();
+    private RelayCourse relay;
+    private float nextScan;
+
+    private void Update()
+    {
+        if (!ScannerOpen() || Time.unscaledTime < nextScan) return;
+        nextScan = Time.unscaledTime + 0.2f;
+        scanResults = FindObjectsByType<EnergyCell>(FindObjectsSortMode.None);
+    }
+
+    private bool ScannerOpen() => gameManager && gameManager.IsPlaying &&
+        (gameManager.Transmission || gameManager.ShowCollectRemainingPrompt || (Keyboard.current != null && Keyboard.current.qKey.isPressed));
+
+    private void DrawScanner()
+    {
+        Camera view = Camera.main;
+        if (!view) return;
+        float size = Mathf.Min(180f, Screen.width * 0.29f, Screen.height * 0.32f);
+        Rect map = new Rect(Screen.width - size - 12f, Screen.height - size - 34f, size, size);
+        GUI.Box(map, "ARQUIVO 88   /   RADAR");
+        Rect list = new Rect(map.x, map.y - 102f, size, 100f);
+        GUILayout.BeginArea(list, GUI.skin.box);
+        GUILayout.Label("Série completa: +1 vida");
+        for (int wave = 1; wave <= gameManager.TotalWaves; wave++)
+        {
+            GUILayout.Label($"{ArenaSector.Year(wave)}    {gameManager.RecoveredIn(wave)} / {gameManager.DocumentsIn(wave)}");
+        }
+        GUILayout.EndArea();
+        Vector2 center = map.center + Vector2.up * 6f;
+        Vector3 forward = Vector3.ProjectOnPlane(view.transform.forward, Vector3.up).normalized;
+        Vector3 right = Vector3.Cross(Vector3.up, forward);
+        void Mark(Vector3 position, Color color, float width)
+        {
+            Vector3 delta = position - playerHealth.transform.position;
+            Vector2 offset = new Vector2(Vector3.Dot(delta, right), -Vector3.Dot(delta, forward));
+            Vector2 point = center + Vector2.ClampMagnitude(offset / 27f, 1f) * (size * 0.5f - 18f);
+            GUI.color = color;
+            GUI.DrawTexture(new Rect(point.x-width/2, point.y-width/2, width, width), Texture2D.whiteTexture);
+        }
+        Color saved = GUI.color;
+        foreach (var cell in scanResults)
+            if (cell) Mark(cell.transform.position, ArenaSector.Ink(cell.ArchiveWave), 5f);
+        if (relay && relay.ActiveRing) Mark(relay.ActiveRing.position, Color.green, 9f);
+        if (gameManager.Transmission) Mark(gameManager.Transmission.transform.position, Color.green, 10f);
+        Mark(playerHealth.transform.position, Color.white, 7f);
+        GUI.color = saved;
+        GUI.Label(new Rect(map.x, map.yMax, size, 25), gameManager.Transmission ? "Terminal • verde" : "Você • centro    Aro • verde");
+    }
+
+    private void OnGUI()
+    {
+        if (!gameManager || !gameManager.IsPlaying || !movement || !shooter) return;
+        if (ScannerOpen()) DrawScanner();
+        float height = Screen.width < 750 ? 54f : 46f;
+        GUILayout.BeginArea(new Rect(10, Screen.height - height - 8, Mathf.Min(Screen.width - 20, 680), height), GUI.skin.box);
+        GUILayout.Label($"Espaço • Esquiva {ReadyIn(movement.DashCooldown)}     E • Pulso {ReadyIn(shooter.PulseCooldown)}");
+        GUILayout.Label($"WASD mover   ·   Clique disparar   ·   Tab câmera   ·   Roda zoom   ·   Q radar   ·   M som {(ArchiveAudio.Muted ? "off" : "on")}");
+        GUILayout.EndArea();
+    }
+
+    private static string ReadyIn(float seconds) => seconds > 0 ? $"({seconds:0.0}s)" : "(pronto)";
 
     private void Awake()
     {
         ResolveReferences();
+        if (gameManager) relay = gameManager.GetComponent<RelayCourse>();
+        if (relay && victoryRestartButton)
+        {
+            Button finish = Instantiate(victoryRestartButton, victoryRestartButton.transform.parent);
+            finish.name = "ArchiveReturnButton";
+            finish.onClick = new Button.ButtonClickedEvent();
+            finish.onClick.AddListener(ArchiveEpilogue.ReturnToDesk);
+            finish.GetComponentInChildren<TMP_Text>(true).text = "Voltar ao balcão";
+            ((RectTransform)finish.transform).anchoredPosition += Vector2.left * 145f;
+            ((RectTransform)victoryRestartButton.transform).anchoredPosition += Vector2.right * 145f;
+        }
+        if (playerHealth)
+        {
+            movement = playerHealth.GetComponent<PlayerMovement>();
+            shooter = playerHealth.GetComponent<PlayerShooter>();
+        }
     }
 
     private void OnEnable()
@@ -178,17 +260,17 @@ public class ArenaHUD : MonoBehaviour
 
         if (waveText != null)
         {
-            waveText.text = $"Onda: {gameManager.CurrentWave}/{gameManager.TotalWaves}";
+            waveText.text = $"{gameManager.CurrentWave}/{gameManager.TotalWaves} • {ArenaSector.Name(gameManager.CurrentWave)}";
         }
 
         if (enemiesText != null)
         {
-            enemiesText.text = $"Inimigos: {gameManager.RemainingEnemies}";
+            enemiesText.text = $"Drones: {gameManager.RemainingEnemies}";
         }
 
         if (cellsText != null)
         {
-            cellsText.text = $"Células: {gameManager.CollectedCells}/{gameManager.TotalCells}";
+            cellsText.text = $"Fichas: {gameManager.CollectedCells}/{gameManager.TotalCells}";
         }
 
         if (scoreText != null)
@@ -198,11 +280,13 @@ public class ArenaHUD : MonoBehaviour
 
         if (objectiveHintText != null)
         {
-            objectiveHintText.gameObject.SetActive(gameManager.ShowCollectRemainingPrompt);
+            objectiveHintText.gameObject.SetActive(gameManager.RelayHint != null || gameManager.ShowCollectRemainingPrompt);
+            if (gameManager.RelayHint != null)
+                objectiveHintText.text = gameManager.RelayHint;
             if (gameManager.ShowCollectRemainingPrompt)
             {
                 int remaining = Mathf.Max(0, gameManager.TotalCells - gameManager.CollectedCells);
-                objectiveHintText.text = $"Última onda concluída! Colete as {remaining} célula(s) restante(s).";
+                objectiveHintText.text = $"Acervo incompleto • Fichas a recuperar: {remaining}.";
             }
         }
     }
@@ -218,12 +302,13 @@ public class ArenaHUD : MonoBehaviour
         {
             if (isVictory && victorySummaryText != null)
             {
-                victorySummaryText.text = $"Pontuação Final: {gameManager.Score}/{gameManager.MaxScore}";
+                string receipt = relay && relay.RemessaRetida ? "Remessa 17 retida" : "Acervo recuperado";
+                victorySummaryText.text = $"{receipt} • {gameManager.Score} pontos\n1985 · {gameManager.RecoveredIn(1)} fichas    1987 · {gameManager.RecoveredIn(2)}    1988 · {gameManager.RecoveredIn(3)}";
             }
 
             if (isDefeat && defeatSummaryText != null)
             {
-                defeatSummaryText.text = $"Pontuação: {gameManager.Score}/{gameManager.MaxScore}";
+                defeatSummaryText.text = $"Transmissão interrompida.\nPontuação: {gameManager.Score}/{gameManager.MaxScore}";
             }
         }
     }

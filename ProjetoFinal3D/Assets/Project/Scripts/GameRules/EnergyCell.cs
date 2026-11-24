@@ -13,6 +13,28 @@ public class EnergyCell : MonoBehaviour
     private Rigidbody body;
     private Vector3 startPosition;
     private bool isCollected;
+    public int ArchiveWave { get; private set; }
+
+    public void Catalog(int wave)
+    {
+        ArchiveWave = wave;
+        gameObject.name = $"Ficha de {ArenaSector.Year(wave)}";
+        var renderer = GetComponent<MeshRenderer>();
+        if (!renderer) return;
+        var block = new MaterialPropertyBlock();
+        block.SetColor("_BaseColor", ArenaSector.Ink(wave));
+        renderer.SetPropertyBlock(block);
+        var stamp = new GameObject("Carimbo");
+        stamp.transform.SetParent(transform, false);
+        stamp.transform.localPosition = new Vector3(0f, 0f, -0.52f);
+        var text = stamp.AddComponent<TextMesh>();
+        text.anchor = TextAnchor.MiddleCenter;
+        text.alignment = TextAlignment.Center;
+        text.fontSize = 48;
+        text.characterSize = 0.031f;
+        text.color = new Color(0.05f, 0.09f, 0.12f);
+        text.text = $"ARQUIVO 88\n{ArenaSector.Year(wave)}";
+    }
 
     private void Awake()
     {
@@ -73,7 +95,8 @@ public class EnergyCell : MonoBehaviour
 
         if (manager != null)
         {
-            manager.RegisterCellCollected();
+            if (ArchiveWave > 0) manager.RegisterDocument(ArchiveWave);
+            else manager.RegisterCellCollected();
         }
         else
         {
