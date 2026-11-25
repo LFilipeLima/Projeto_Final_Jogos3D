@@ -13,6 +13,9 @@ public sealed class SpecialEnemy : MonoBehaviour
     private Vector3 direction;
     private float attackTime;
     private float nextAttack;
+    private ArchiveDroneModel model;
+    private float WarningDuration => gunner ? 0.95f : 0.8f;
+    private void Start() => model = GetComponent<ArchiveDroneModel>();
     private const float SlamRadius = 3f;
 
     public void Configure(PlayerHealth target, bool ranged)
@@ -49,6 +52,7 @@ public sealed class SpecialEnemy : MonoBehaviour
         if (!agent.isOnNavMesh) return;
         if (warning)
         {
+            if (model) model.WindUp(1f - (attackTime - Time.time) / WarningDuration);
             if (Time.time >= attackTime) ResolveAttack();
             return;
         }
@@ -65,7 +69,8 @@ public sealed class SpecialEnemy : MonoBehaviour
         origin = GetComponent<Collider>().bounds.center;
         direction = delta.normalized;
         ArchiveAudio.Play(gunner ? ArchiveAudio.Cue.Gunner : ArchiveAudio.Cue.Heavy, warningSpeaker);
-        attackTime = Time.time + (gunner ? 0.95f : 0.8f);
+        attackTime = Time.time + WarningDuration;
+        if (direction.sqrMagnitude > 0.001f) transform.rotation = Quaternion.LookRotation(direction);
         if (gunner)
         {
             warning = ArenaSignal.Line(signalMaterial, Color.magenta, 2);
@@ -91,6 +96,7 @@ public sealed class SpecialEnemy : MonoBehaviour
             if (delta.sqrMagnitude <= SlamRadius * SlamRadius && !agent.Raycast(player.transform.position, out _))
                 player.TakeDamage(1);
         }
+        if (model) model.WindUp(0f);
         Destroy(warning.gameObject);
         warning = null;
         nextAttack = Time.time + 2f;

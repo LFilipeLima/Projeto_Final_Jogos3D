@@ -9,6 +9,12 @@ EditorBuildSettings:
     path: Assets/Project/Scenes/Protocolo.unity
     guid: eb3a062ea808944aea3a7ec02961d2df
   - enabled: 1
+    path: Assets/Project/Scenes/Deposito.unity
+    guid: a3221d65e1e5349afaf26fbe2e09c9e6
+  - enabled: 1
+    path: Assets/Project/Scenes/PatioFerroviario.unity
+    guid: fc593a96684164cd984375fca817148e
+  - enabled: 1
     path: Assets/Project/Scenes/MainArena.unity
     guid: 09e703fb39e4a9d4093768359f28b998
   - enabled: 1

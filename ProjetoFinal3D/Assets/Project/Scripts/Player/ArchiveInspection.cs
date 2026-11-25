@@ -101,7 +101,7 @@ public sealed class ArchiveInspection : MonoBehaviour
         else
         {
             BoxRecovered = true;
-            response = "Remessa 17 recuperada. Destino: galpão de triagem.";
+            response = "Remessa 17 recuperada. Siga pelo depósito até o galpão de triagem.";
             CorrectBoxRecovered?.Invoke();
         }
         responseUntil = Time.time + 4f;

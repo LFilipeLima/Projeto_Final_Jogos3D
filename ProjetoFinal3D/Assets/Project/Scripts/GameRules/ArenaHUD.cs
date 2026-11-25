@@ -65,7 +65,7 @@ public class ArenaHUD : MonoBehaviour
         {
             Vector3 delta = position - playerHealth.transform.position;
             Vector2 offset = new Vector2(Vector3.Dot(delta, right), -Vector3.Dot(delta, forward));
-            Vector2 point = center + Vector2.ClampMagnitude(offset / 27f, 1f) * (size * 0.5f - 18f);
+            Vector2 point = center + Vector2.ClampMagnitude(offset / 50f, 1f) * (size * 0.5f - 18f);
             GUI.color = color;
             GUI.DrawTexture(new Rect(point.x-width/2, point.y-width/2, width, width), Texture2D.whiteTexture);
         }
@@ -83,11 +83,36 @@ public class ArenaHUD : MonoBehaviour
     {
         if (!gameManager || !gameManager.IsPlaying || !movement || !shooter) return;
         if (ScannerOpen()) DrawScanner();
+        if (gameManager.Transmission)
+        {
+            DrawTransmission(gameManager.Transmission);
+            return;
+        }
         float height = Screen.width < 750 ? 54f : 46f;
         GUILayout.BeginArea(new Rect(10, Screen.height - height - 8, Mathf.Min(Screen.width - 20, 680), height), GUI.skin.box);
         GUILayout.Label($"Espaço • Esquiva {ReadyIn(movement.DashCooldown)}     E • Pulso {ReadyIn(shooter.PulseCooldown)}");
         GUILayout.Label($"WASD mover   ·   Clique disparar   ·   Tab câmera   ·   Roda zoom   ·   Q radar   ·   M som {(ArchiveAudio.Muted ? "off" : "on")}");
         GUILayout.EndArea();
+    }
+
+    private static void DrawTransmission(ArchiveTransmission terminal)
+    {
+        float width = Mathf.Min(440f, Screen.width * 0.62f);
+        Rect panel = new Rect(10f, Screen.height - 88f, width, 78f);
+        GUI.Box(panel, "REMESSA 17   /   ENVIO DO ORIGINAL");
+        int percent = Mathf.FloorToInt(100f * terminal.Progress);
+        string action = terminal.Sending ? $"Transmitindo série de {terminal.CurrentYear}" :
+            terminal.InReach ? "Segure R para transmitir" : $"Terminal a {Mathf.CeilToInt(terminal.Distance)} m";
+        if (!terminal.Sending && percent > 0) action += " • envio pausado";
+        GUI.Label(new Rect(panel.x+10, panel.y+24, width-20, 25), $"{action}   {percent}%");
+        Rect track = new Rect(panel.x+10, panel.y+55, width-20, 8);
+        Color previous = GUI.color;
+        GUI.color = Color.gray;
+        GUI.DrawTexture(track, Texture2D.whiteTexture);
+        GUI.color = Color.cyan;
+        track.width *= terminal.Progress;
+        GUI.DrawTexture(track, Texture2D.whiteTexture);
+        GUI.color = previous;
     }
 
     private static string ReadyIn(float seconds) => seconds > 0 ? $"({seconds:0.0}s)" : "(pronto)";

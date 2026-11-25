@@ -14,7 +14,7 @@ public static class ArenaSector
         var sector = new GameObject(Name(wave));
         var notice = new GameObject("Painel do arquivo");
         notice.transform.SetParent(sector.transform);
-        notice.transform.position = new Vector3(0f, 2.65f, 9.9f);
+        notice.transform.position = new Vector3(0f, 2.65f, 15.9f);
         var sign = notice.AddComponent<TextMesh>();
         sign.anchor = TextAnchor.UpperCenter;
         sign.alignment = TextAlignment.Center;

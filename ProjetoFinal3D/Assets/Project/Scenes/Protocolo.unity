@@ -407,7 +407,7 @@ MonoBehaviour:
   inspection: {fileID: 3642928894922273666}
   shutter: {fileID: 977776744}
   sign: {fileID: 240919873}
-  destination: Assets/Project/Scenes/MainArena.unity
+  destination: Assets/Project/Scenes/Deposito.unity
 --- !u!54 &138633506
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -468,7 +468,7 @@ GameObject:
   - component: {fileID: 240919874}
   - component: {fileID: 240919873}
   m_Layer: 0
-  m_Name: "GALP\xC3O   /   FECHADO"
+  m_Name: "DEP\xD3SITO   /   FECHADO"
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -482,7 +482,7 @@ TextMesh:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 240919872}
-  m_Text: "GALP\xC3O   /   FECHADO"
+  m_Text: "DEP\xD3SITO   /   FECHADO"
   m_OffsetZ: 0
   m_CharacterSize: 0.048
   m_LineSpacing: 1
