@@ -9,6 +9,10 @@ public sealed class ArchiveTransmission : MonoBehaviour
     private TextMesh display;
     private float elapsed;
     private int shownPercent = -1;
+    public bool InReach { get; private set; }
+    public bool Sending { get; private set; }
+    public float Distance { get; private set; }
+    public int CurrentYear => ArenaSector.Year(Mathf.Min(GameManager.TotalWavesCount, 1 + Mathf.FloorToInt(elapsed / SecondsPerSeries)));
     public float Progress => Mathf.Clamp01(elapsed / (SecondsPerSeries * GameManager.TotalWavesCount));
     private Action complete;
 
@@ -44,14 +48,16 @@ public sealed class ArchiveTransmission : MonoBehaviour
         offset.y = 0f;
         if (offset.sqrMagnitude > .001f)
             display.transform.rotation = Quaternion.LookRotation(-offset);
-        if (offset.sqrMagnitude > 2.2f * 2.2f || Keyboard.current == null || !Keyboard.current.rKey.isPressed) return;
+        Distance = offset.magnitude;
+        InReach = Distance <= 2.2f;
+        Sending = InReach && Keyboard.current != null && Keyboard.current.rKey.isPressed;
+        if (!Sending) return;
 
-        int series = Mathf.Min(3, 1 + Mathf.FloorToInt(elapsed / SecondsPerSeries));
         elapsed += Time.deltaTime;
         int percent = Mathf.FloorToInt(100 * Progress);
         if (percent != shownPercent)
         {
-            display.text = $"REMESSA 17   /   {ArenaSector.Year(series)}\n{percent}%";
+            display.text = $"REMESSA 17   /   {CurrentYear}\n{percent}%";
             shownPercent = percent;
         }
         if (Progress < 1f) return;

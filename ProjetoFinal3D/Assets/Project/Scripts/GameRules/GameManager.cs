@@ -243,8 +243,14 @@ public class GameManager : MonoBehaviour
             enemyInstance.name = $"{enemyPrefab.name}_Onda{CurrentWave}_{i + 1}";
 
             BindEnemyContracts(enemyInstance);
-            if (relayCourse && playerHealth && enemyInstance.GetComponent<EnemyController>() && i % 3 != 0)
-                enemyInstance.AddComponent<SpecialEnemy>().Configure(playerHealth, i % 3 == 1);
+            if (relayCourse && playerHealth && enemyInstance.GetComponent<EnemyController>())
+            {
+                int model = i % 3;
+                if (model != 0)
+                    enemyInstance.AddComponent<SpecialEnemy>().Configure(playerHealth, model == 1);
+                if (enemyInstance.GetComponentInChildren<EnemyHitFeedback>())
+                    enemyInstance.AddComponent<ArchiveDroneModel>().Assemble(model);
+            }
         }
 
         NotifyStatsChanged();

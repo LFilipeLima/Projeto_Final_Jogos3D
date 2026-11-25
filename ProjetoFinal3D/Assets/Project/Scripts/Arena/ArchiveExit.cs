@@ -29,7 +29,7 @@ public sealed class ArchiveExit : MonoBehaviour
     private void Open()
     {
         shutter.SetActive(false);
-        sign.text = "GALPÃO   /   ENTRE";
+        sign.text = "DEPÓSITO   /   ENTRE";
         sign.color = new Color(0.45f, 1f, 0.78f);
     }
 
