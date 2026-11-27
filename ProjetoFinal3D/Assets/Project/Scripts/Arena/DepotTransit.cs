@@ -10,6 +10,7 @@ public sealed class DepotTransit : MonoBehaviour
     [SerializeField] private Transform cargoGate;
     [SerializeField] private GameObject serviceGate;
     [SerializeField] private GameObject exitGate;
+    [SerializeField] private DepotSpikeMachine spikeMachine;
     private PlayerShooter player;
     private bool loading;
     private float cycle;
@@ -58,7 +59,10 @@ public sealed class DepotTransit : MonoBehaviour
 
         if (!Cleared && Vector3.Distance(player.transform.position,dispatch.position) < 2.8f &&
             Keyboard.current != null && Keyboard.current.rKey.wasPressedThisFrame)
-            Release("Guia de carga carimbada");
+        {
+            if (spikeMachine) spikeMachine.StopMachine();
+            Release("Despacho concluído • máquina de espinhos parada");
+        }
         if (Cleared && Vector3.Distance(player.transform.position,exit.position) < 2.2f)
         {
             loading = true;
