@@ -6533,7 +6533,7 @@ GameObject:
   m_Component:
   - component: {fileID: 2010912096}
   m_Layer: 0
-  m_Name: "Ambienta\xE7\xE3o \u2014 MainArena"
+  m_Name: AmbientacaoVisual_MainArena
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
