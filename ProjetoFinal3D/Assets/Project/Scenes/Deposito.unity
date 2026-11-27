@@ -192,6 +192,7 @@ GameObject:
   - component: {fileID: 29055046}
   - component: {fileID: 29055048}
   - component: {fileID: 29055047}
+  - component: {fileID: 29055049}
   m_Layer: 0
   m_Name: Placa
   m_TagString: Untagged
@@ -222,7 +223,7 @@ TextMesh:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 29055045}
-  m_Text: "CANCELA AUTOM\xC1TICA"
+  m_Text: "CANCELA DE SEGURAN\xC7A\nLIBERA\xC7\xC3O VIA POSTO DE DESPACHO"
   m_OffsetZ: 0
   m_CharacterSize: 0.11
   m_LineSpacing: 1
@@ -285,6 +286,21 @@ MeshRenderer:
   m_SortingOrder: 0
   m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!114 &29055049
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 29055045}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: eb03ae93c080cc594978fd8f3c6b87c9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::BillboardPlaca
+  travarEixoVertical: 1
+  suavizacao: 10
+  alvoOpcional: {fileID: 0}
 --- !u!1 &61067185
 GameObject:
   m_ObjectHideFlags: 0
@@ -576,6 +592,7 @@ GameObject:
   - component: {fileID: 292140731}
   - component: {fileID: 292140733}
   - component: {fileID: 292140732}
+  - component: {fileID: 292140734}
   m_Layer: 0
   m_Name: Placa
   m_TagString: Untagged
@@ -606,7 +623,7 @@ TextMesh:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 292140730}
-  m_Text: POSTO DE DESPACHO   /   R
+  m_Text: "POSTO DE DESPACHO\n[R] AUTORIZAR LIBERA\xC7\xC3O DE CARGA"
   m_OffsetZ: 0
   m_CharacterSize: 0.11
   m_LineSpacing: 1
@@ -669,6 +686,21 @@ MeshRenderer:
   m_SortingOrder: 0
   m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!114 &292140734
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 292140730}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: eb03ae93c080cc594978fd8f3c6b87c9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::BillboardPlaca
+  travarEixoVertical: 1
+  suavizacao: 10
+  alvoOpcional: {fileID: 0}
 --- !u!1 &363974768
 GameObject:
   m_ObjectHideFlags: 0
@@ -1685,6 +1717,7 @@ GameObject:
   - component: {fileID: 792230320}
   - component: {fileID: 792230322}
   - component: {fileID: 792230321}
+  - component: {fileID: 792230323}
   m_Layer: 0
   m_Name: Placa
   m_TagString: Untagged
@@ -1715,7 +1748,7 @@ TextMesh:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 792230319}
-  m_Text: "EXPEDI\xC7\xC3O   /   P\xC1TIO"
+  m_Text: "SA\xCDDA DE EXPEDI\xC7\xC3O\nACESSO AO P\xC1TIO FERROVI\xC1RIO 17"
   m_OffsetZ: 0
   m_CharacterSize: 0.11
   m_LineSpacing: 1
@@ -1778,6 +1811,21 @@ MeshRenderer:
   m_SortingOrder: 0
   m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!114 &792230323
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 792230319}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: eb03ae93c080cc594978fd8f3c6b87c9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::BillboardPlaca
+  travarEixoVertical: 1
+  suavizacao: 10
+  alvoOpcional: {fileID: 0}
 --- !u!1 &898574494
 GameObject:
   m_ObjectHideFlags: 0
@@ -3463,6 +3511,7 @@ GameObject:
   - component: {fileID: 1572598447}
   - component: {fileID: 1572598449}
   - component: {fileID: 1572598448}
+  - component: {fileID: 1572598450}
   m_Layer: 0
   m_Name: Placa
   m_TagString: Untagged
@@ -3493,7 +3542,7 @@ TextMesh:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1572598446}
-  m_Text: "REL\xC9   /   E"
+  m_Text: "PAINEL DO REL\xC9\n [E] RESTAURAR ENERGIA"
   m_OffsetZ: 0
   m_CharacterSize: 0.11
   m_LineSpacing: 1
@@ -3556,6 +3605,21 @@ MeshRenderer:
   m_SortingOrder: 0
   m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!114 &1572598450
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1572598446}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: eb03ae93c080cc594978fd8f3c6b87c9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::BillboardPlaca
+  travarEixoVertical: 1
+  suavizacao: 10
+  alvoOpcional: {fileID: 0}
 --- !u!1001 &1594730630
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -4748,6 +4812,7 @@ GameObject:
   - component: {fileID: 2139155252}
   - component: {fileID: 2139155254}
   - component: {fileID: 2139155253}
+  - component: {fileID: 2139155255}
   m_Layer: 0
   m_Name: Placa
   m_TagString: Untagged
@@ -4778,7 +4843,8 @@ TextMesh:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2139155251}
-  m_Text: "DEP\xD3SITO 17\n< MANUTEN\xC7\xC3O                 CARGA >"
+  m_Text: "DEP\xD3SITO 17 \u2014 TRIAGEM DE CARGA\n< MANUTEN\xC7\xC3O (REL\xC9) EXPEDI\xC7\xC3O
+    >"
   m_OffsetZ: 0
   m_CharacterSize: 0.11
   m_LineSpacing: 1
@@ -4841,6 +4907,21 @@ MeshRenderer:
   m_SortingOrder: 0
   m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!114 &2139155255
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2139155251}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: eb03ae93c080cc594978fd8f3c6b87c9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::BillboardPlaca
+  travarEixoVertical: 1
+  suavizacao: 10
+  alvoOpcional: {fileID: 0}
 --- !u!1001 &5328782796153041758
 PrefabInstance:
   m_ObjectHideFlags: 0

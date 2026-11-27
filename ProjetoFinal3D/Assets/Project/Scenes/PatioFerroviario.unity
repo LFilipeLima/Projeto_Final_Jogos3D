@@ -1286,6 +1286,7 @@ GameObject:
   - component: {fileID: 199812797}
   - component: {fileID: 199812799}
   - component: {fileID: 199812798}
+  - component: {fileID: 199812800}
   m_Layer: 0
   m_Name: Placa
   m_TagString: Untagged
@@ -1316,7 +1317,7 @@ TextMesh:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 199812796}
-  m_Text: "P\xC1TIO 17   /   EMBARQUE"
+  m_Text: "P\xC1TIO FERROVI\xC1RIO 17 \nSETOR DE EMBARQUE E TRANSFER\xCANCIA"
   m_OffsetZ: 0
   m_CharacterSize: 0.1
   m_LineSpacing: 1
@@ -1379,6 +1380,21 @@ MeshRenderer:
   m_SortingOrder: 0
   m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!114 &199812800
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 199812796}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: eb03ae93c080cc594978fd8f3c6b87c9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::BillboardPlaca
+  travarEixoVertical: 1
+  suavizacao: 10
+  alvoOpcional: {fileID: 0}
 --- !u!1 &245867365
 GameObject:
   m_ObjectHideFlags: 0
@@ -1502,6 +1518,7 @@ GameObject:
   - component: {fileID: 286214720}
   - component: {fileID: 286214722}
   - component: {fileID: 286214721}
+  - component: {fileID: 286214723}
   m_Layer: 0
   m_Name: Placa
   m_TagString: Untagged
@@ -1532,7 +1549,7 @@ TextMesh:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 286214719}
-  m_Text: "GALP\xC3O"
+  m_Text: "GALP\xC3O PRINCIPAL\n\xC1REA DE CONTEN\xC7\xC3O"
   m_OffsetZ: 0
   m_CharacterSize: 0.1
   m_LineSpacing: 1
@@ -1595,6 +1612,21 @@ MeshRenderer:
   m_SortingOrder: 0
   m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!114 &286214723
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 286214719}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: eb03ae93c080cc594978fd8f3c6b87c9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::BillboardPlaca
+  travarEixoVertical: 1
+  suavizacao: 10
+  alvoOpcional: {fileID: 0}
 --- !u!1001 &346484511
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -9298,6 +9330,7 @@ GameObject:
   - component: {fileID: 1750721313}
   - component: {fileID: 1750721315}
   - component: {fileID: 1750721314}
+  - component: {fileID: 1750721316}
   m_Layer: 0
   m_Name: Placa
   m_TagString: Untagged
@@ -9328,7 +9361,7 @@ TextMesh:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1750721312}
-  m_Text: MANOBRA   /   R
+  m_Text: "CHAVE DE MANOBRA\n [R] ALTERAR ROTA DO VAG\xC3O"
   m_OffsetZ: 0
   m_CharacterSize: 0.1
   m_LineSpacing: 1
@@ -9391,6 +9424,21 @@ MeshRenderer:
   m_SortingOrder: 0
   m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!114 &1750721316
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1750721312}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: eb03ae93c080cc594978fd8f3c6b87c9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::BillboardPlaca
+  travarEixoVertical: 1
+  suavizacao: 10
+  alvoOpcional: {fileID: 0}
 --- !u!1 &1781506868
 GameObject:
   m_ObjectHideFlags: 0

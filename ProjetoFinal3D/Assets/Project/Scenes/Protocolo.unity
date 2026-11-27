@@ -562,6 +562,7 @@ GameObject:
   - component: {fileID: 240919875}
   - component: {fileID: 240919874}
   - component: {fileID: 240919873}
+  - component: {fileID: 240919876}
   m_Layer: 0
   m_Name: "DEP\xD3SITO   /   FECHADO"
   m_TagString: Untagged
@@ -577,7 +578,7 @@ TextMesh:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 240919872}
-  m_Text: "DEP\xD3SITO   /   FECHADO"
+  m_Text: "ACESSO AO DEP\xD3SITO 17\n [BLOQUEADO \u2014 VERIFIQUE OS REGISTROS]"
   m_OffsetZ: 0
   m_CharacterSize: 0.048
   m_LineSpacing: 1
@@ -655,6 +656,21 @@ Transform:
   m_Children: []
   m_Father: {fileID: 1529441169}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &240919876
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 240919872}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: eb03ae93c080cc594978fd8f3c6b87c9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::BillboardPlaca
+  travarEixoVertical: 1
+  suavizacao: 10
+  alvoOpcional: {fileID: 0}
 --- !u!1 &256117105 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 6742292232460459951, guid: 1845ab77c3cd74847a6fc5415e959c7f, type: 3}
@@ -987,6 +1003,7 @@ GameObject:
   - component: {fileID: 715270492}
   - component: {fileID: 715270494}
   - component: {fileID: 715270493}
+  - component: {fileID: 715270495}
   m_Layer: 0
   m_Name: 'ARQUIVO 88
 
@@ -1019,9 +1036,8 @@ TextMesh:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 715270491}
-  m_Text: 'ARQUIVO 88
-
-    SETOR DE PROTOCOLO'
+  m_Text: "ARQUIVO 88 \u2014 SETOR DE PROTOCOLO \nACESSO RESTRITO \u2022 TRIAGEM
+    DE DOSSI\xCAS"
   m_OffsetZ: 0
   m_CharacterSize: 0.077
   m_LineSpacing: 1
@@ -1084,6 +1100,21 @@ MeshRenderer:
   m_SortingOrder: 0
   m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!114 &715270495
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 715270491}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: eb03ae93c080cc594978fd8f3c6b87c9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::BillboardPlaca
+  travarEixoVertical: 1
+  suavizacao: 10
+  alvoOpcional: {fileID: 0}
 --- !u!1001 &778101481
 PrefabInstance:
   m_ObjectHideFlags: 0
